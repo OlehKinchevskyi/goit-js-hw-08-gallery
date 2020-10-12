@@ -7,47 +7,84 @@ const refs = {
   galleryContainer: document.querySelector(".js-gallery"),
   modalOpenGalleryItem: document.querySelector(".lightbox__image"),
   lightboxOverlay: document.querySelector(".lightbox__overlay"),
+  modalPreviousPhoto: document.querySelector("button.lightbox__prev__button"),
+  modalNextPhoto: document.querySelector("button.lightbox__next__button"),
+  
 };
-console.log(refs.modalOpenGalleryItem);
+
 const galleryMarkap = createGalleryCardsMarkup(imageRef);
 
-refs.galleryContainer.insertAdjacentHTML("beforeend", galleryMarkap);
-
 function createGalleryCardsMarkup(imageRef) {
-  return imageRef
-    .map(({ preview, original, description }) => {
-      return `
-      <li class="gallery__item">
-        <a
-          class="gallery__link"
-          href="${original}"
-          >
-          <img
-            class="gallery__image"
-            src="${preview}"
-            data-source="${original}"
-            alt="${description}"
-          />
-        </a>
-      </li>`;
-    })
-    .join(``);
+  const elements = [];
+  for (let i = 0; i < imageRef.length; i += 1) {
+    const option = imageRef[i];
+    let galleryEl = document.createElement('li');
+    galleryEl.setAttribute('class', `gallery__item`);
+
+    const galleryA = document.createElement("a");
+    galleryA.setAttribute('class', `gallery__link`);
+    galleryA.setAttribute('href', `${imageRef[i].original}`);
+
+    const galleryImg = document.createElement("img");
+    galleryImg.setAttribute('class', `gallery__image`);
+    galleryImg.setAttribute('src', `${imageRef[i].preview}`);
+    galleryImg.setAttribute('data-source', `${imageRef[i].original}`);
+    galleryImg.setAttribute('alt', `${imageRef[i].description}`);
+
+    galleryEl.append(galleryA);
+    galleryA.append(galleryImg);
+    elements.push(galleryEl);
+    
+  }
+
+  return refs.galleryContainer.append(...elements);
 }
+createGalleryCardsMarkup(imageRef);
+   
 refs.galleryContainer.addEventListener("click", onOpenModal);
 refs.closeModal.addEventListener("click", onCloseModal);
 refs.lightboxOverlay.addEventListener("click", onOverlayClick);
 
 function onOpenModal(evt) {
-    evt.preventDefault()
-    window.addEventListener("keydown", onEscKeyPress);
-    if (evt.target.nodeName !== 'IMG') {
-        console.log(evt.target.nodeName);
-        return;
-    }
+  evt.preventDefault()
+  window.addEventListener("keydown", onEscKeyPress);
+  refs.modalPreviousPhoto.addEventListener("click", onPreviousPhoto);
+  refs.modalNextPhoto.addEventListener("click", onNextPhoto);
+
+function onPreviousPhoto() {
+      console.log('Prev');
+      let prev = evt.target.parentNode.parentNode.previousSibling.children[0].children[0];
+      refs.modalOpenGalleryItem.setAttribute(
+      "src",
+      `${prev.getAttribute("data-source")}`
+    );
+    refs.modalOpenGalleryItem.setAttribute(
+      "alt",
+      `${prev.getAttribute("alt")}`
+    );
+    console.log(refs.modalOpenGalleryItem);
+    return refs.modalOpenGalleryItem;
+  }
+  function onNextPhoto() {
+    console.log('Next');
+    let next = evt.target.parentNode.parentNode.nextSibling.children[0].children[0];
   
+      refs.modalOpenGalleryItem.setAttribute(
+      "src",
+      `${next.getAttribute("data-source")}`
+    );
+    refs.modalOpenGalleryItem.setAttribute(
+      "alt",
+      `${next.getAttribute("alt")}`
+    );
+    console.log(refs.modalOpenGalleryItem);
+    return refs.modalOpenGalleryItem;
+  }
+
+  if (evt.target.nodeName !== 'IMG') { console.log(evt.target.nodeName); return; }
+  {
     refs.openModal.classList.add("is-open");
     console.log(`Модалка открыта`);
-    //console.log(evt.target);
 
     refs.modalOpenGalleryItem.setAttribute(
       "src",
@@ -57,7 +94,8 @@ function onOpenModal(evt) {
       "alt",
       `${evt.target.getAttribute("alt")}`
     );
-  
+    console.log(refs.modalOpenGalleryItem);
+  };
 }
 
 function onCloseModal() {
@@ -69,6 +107,7 @@ function onCloseModal() {
 }
 
 function onOverlayClick(evt) {
+
   if (evt.currentTarget === evt.target) {
     console.log(`Клик по бекдропу`);
     onCloseModal();
